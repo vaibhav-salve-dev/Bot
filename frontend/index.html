@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Sanjivani AI - RAG Powered Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a1a3a, #1a3a6a, #0d2b4e);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 50%, rgba(255,215,0,0.08), transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(10,43,62,0.1), transparent 60%);
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            background: rgba(255,255,255,0.95);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0a2b3e, #0d3b5e);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border-bottom: 3px solid #FFD700;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .college-logo {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(255,215,0,0); }
+        }
+
+        .college-logo i {
+            font-size: 28px;
+            color: #0a2b3e;
+        }
+
+        .college-info h1 {
+            font-size: 22px;
+            color: #FFD700;
+        }
+
+        .college-info p {
+            font-size: 11px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255,215,0,0.3);
+        }
+
+        .stat-number {
+            font-size: 22px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .dashboard {
+            display: flex;
+            min-height: 500px;
+        }
+
+        .chat-area {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            max-height: 450px;
+        }
+
+        .messages-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages-area::-webkit-scrollbar-track {
+            background: #e0e0e0;
+            border-radius: 10px;
+        }
+
+        .messages-area::-webkit-scrollbar-thumb {
+            background: #0a2b3e;
+            border-radius: 10px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .bot-message {
+            justify-content: flex-start;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 12px;
+            flex-shrink: 0;
+        }
+
+        .user-message .avatar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .bot-message .avatar {
+            background: linear-gradient(135deg, #0a2b3e, #0d3b5e);
+            color: #FFD700;
+        }
+
+        .bubble {
+            max-width: 75%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .user-message .bubble {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message .bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* ========== GENERATIVE UI COMPONENTS ========== */
+        .gen-ui-container {
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        /* Placement Cards */
+        .gen-placement-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .gen-placement-item {
+            background: linear-gradient(135deg, #0a2b3e, #0d3b5e);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .gen-placement-item .icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .gen-placement-item .value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .gen-placement-item .label {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        /* Cutoff Table */
+        .gen-cutoff-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        .gen-cutoff-table th {
+            background: #0a2b3e;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .gen-cutoff-table td {
+            padding: 8px 10px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .gen-cutoff-table tr:hover {
+            background: #f0f2f5;
+        }
+
+        /* Fee Cards */
+        .gen-fee-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .gen-fee-item {
+            background: #f8f9fa;
+            padding: 10px 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gen-fee-item .label {
+            font-size: 12px;
+            color: #555;
+        }
+
+        .gen-fee-item .value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0a2b3e;
+        }
+
+        /* Recruiter Tags */
+        .gen-recruiter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .gen-recruiter-tag {
+            background: linear-gradient(135deg, #0a2b3e, #0d3b5e);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+
+        /* Branch Cards */
+        .gen-branch-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .gen-branch-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .gen-branch-card .name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #0a2b3e;
+        }
+
+        .gen-branch-card .detail {
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* Source Badge */
+        .source-badge {
+            display: inline-block;
+            background: #e8f0fe;
+            color: #1a73e8;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            margin-right: 4px;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 30px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-wrapper input:focus {
+            border-color: #0a2b3e;
+            box-shadow: 0 0 0 3px rgba(10,43,62,0.1);
+        }
+
+        .voice-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0a2b3e, #0d3b5e);
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .voice-btn.listening {
+            background: #ef4444;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .send-btn {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #0a2b3e, #0d3b5e);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(10,43,62,0.3);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            flex: 1;
+            background: #f0f2f5;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: #FFD700;
+        }
+
+        .feature-icon {
+            width: 45px;
+            height: 45px;
+            background: rgba(10,43,62,0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 12px;
+            color: #0a2b3e;
+        }
+
+        .feature-card h3 {
+            font-size: 15px;
+            margin-bottom: 5px;
+            color: #0a2b3e;
+        }
+
+        .feature-card p {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .quick-btn {
+            background: #f0f2f5;
+            border: none;
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .quick-btn:hover {
+            background: linear-gradient(135deg, #0a2b3e, #0d3b5e);
+            color: white;
+        }
+
+        .confidence-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+
+        .confidence-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .confidence-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .confidence-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Info Section */
+        .info-section {
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            padding: 25px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #0a2b3e;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #FFD700;
+            display: inline-block;
+        }
+
+        .chart-container {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container h4 {
+            font-size: 16px;
+            color: #0a2b3e;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .charts-wrapper {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .chart-box {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-box h5 {
+            font-size: 14px;
+            color: #0a2b3e;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        canvas {
+            max-height: 250px;
+            width: 100%;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card-large {
+            background: linear-gradient(135deg, #0a2b3e, #0d3b5e);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .stat-card-large .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .stat-card-large .stat-desc {
+            font-size: 12px;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-block {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 18px;
+            border-left: 4px solid #FFD700;
+        }
+
+        .info-block h4 {
+            font-size: 14px;
+            color: #0a2b3e;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-block p, .info-block li {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .info-block ul {
+            margin-left: 20px;
+        }
+
+        .info-block li {
+            margin-bottom: 5px;
+        }
+
+        .recruiter-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .recruiter-tag {
+            background: #e0e0e0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #333;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .charts-wrapper {
+                grid-template-columns: 1fr;
+            }
+            .gen-branch-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            .bubble {
+                max-width: 85%;
+            }
+            .stats {
+                display: none;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            .gen-placement-grid {
+                grid-template-columns: 1fr;
+            }
+            .gen-fee-grid {
+                grid-template-columns: 1fr;
+            }
+            .gen-branch-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="animated-bg"></div>
+
+<div class="app-container">
+    <div class="header">
+        <div class="logo-area">
+            <div class="college-logo">
+                <i class="fas fa-university"></i>
+            </div>
+            <div class="college-info">
+                <h1>Sanjivani College of Engineering</h1>
+                <p>Kopargaon, Ahmednagar | NAAC AAA Grade | Est. 1983</p>
+            </div>
+        </div>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="queryCount">0</div>
+                <div class="stat-label">Queries</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="aiStatus">RAG + AI</div>
+                <div class="stat-label">AI Model</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dashboard">
+        <div class="chat-area">
+            <div class="messages-area" id="messagesArea">
+                <div class="message bot-message">
+                    <div class="avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="bubble">
+                        <strong> Welcome to Sanjivani RAG AI Assistant!</strong><br><br>
+                        I'm powered by <strong>RAG (Retrieval-Augmented Generation)</strong> with:<br><br>
+                         <strong>Vector Search</strong> - Finding exact information from college data<br>
+                         <strong>Context Memory</strong> - Remembering our conversation<br>
+                         <strong>Guardrails</strong> - Ensuring accurate and appropriate responses<br>
+                         <strong>Generative UI</strong> - Dynamic visual components<br><br>
+                        <strong>Try asking:</strong><br>
+                        • "What branches are available?"<br>
+                        • "What is the cutoff for CSE SC category?"<br>
+                        • "My MHT-CET score is 85, SC, want CSE"<br>
+                        • "What is the placement record?"<br>
+                        • "Tell me about hostel facilities"<br><br>
+                        <i class="fas fa-microphone"></i> <strong>Voice input available!</strong> Click the mic button.
+                    </div>
+                </div>
+            </div>
+            <div class="input-area">
+                <button class="voice-btn" id="voiceBtn">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <div class="input-wrapper">
+                    <input type="text" id="userInput" placeholder="Ask me anything about Sanjivani College..." autocomplete="off">
+                </div>
+                <button class="send-btn" id="sendBtn">
+                    Send <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <div class="feature-card" onclick="quickAsk('placement record for Computer Science')">
+                <div class="feature-icon">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <h3>CSE Placement</h3>
+                <p>95% placed | ₹7.5 LPA average</p>
+            </div>
+            
+            <div class="feature-card" onclick="quickAsk('placement record for Mechanical')">
+                <div class="feature-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h3>Mechanical Placement</h3>
+                <p>82% placed | ₹4.8 LPA average</p>
+            </div>
+            
+            <div class="feature-card" onclick="quickAsk('fee structure for B.Tech')">
+                <div class="feature-icon">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <h3>Fee Structure</h3>
+                <p>B.Tech: ₹1.21L/year</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3><i class="fas fa-bolt"></i> Quick Questions</h3>
+                <div class="quick-actions">
+                    <button class="quick-btn" onclick="quickAsk('college address and contact')">
+                        <i class="fas fa-location-dot"></i> Address
+                    </button>
+                    <button class="quick-btn" onclick="quickAsk('hostel facilities')">
+                        <i class="fas fa-hotel"></i> Hostel
+                    </button>
+                    <button class="quick-btn" onclick="quickAsk('cutoff for Computer Science')">
+                        <i class="fas fa-chart-line"></i> Cutoffs
+                    </button>
+                    <button class="quick-btn" onclick="quickAsk('My MHT-CET score is 85, category SC, want Computer Science')">
+                        <i class="fas fa-calculator"></i> Chance
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATISTICS SECTION -->
+    <div class="info-section">
+        <div class="stats-grid">
+            <div class="stat-card-large">
+                <div class="stat-value">₹27 LPA</div>
+                <div class="stat-desc">Highest Package (CSE)</div>
+            </div>
+            <div class="stat-card-large">
+                <div class="stat-value">₹5.8 LPA</div>
+                <div class="stat-desc">Average Package</div>
+            </div>
+            <div class="stat-card-large">
+                <div class="stat-value">85%</div>
+                <div class="stat-desc">Placement Rate</div>
+            </div>
+            <div class="stat-card-large">
+                <div class="stat-value">827+</div>
+                <div class="stat-desc">Students Placed</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h4><i class="fas fa-chart-bar"></i> Branch-wise Placement Statistics (2024-25)</h4>
+            <div class="charts-wrapper">
+                <div class="chart-box">
+                    <h5>Placement Rate by Branch</h5>
+                    <canvas id="placementRateChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h5>Average Package by Branch (₹ LPA)</h5>
+                    <canvas id="avgPackageChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-block">
+                <h4><i class="fas fa-chart-line"></i> Branch-wise Average Package</h4>
+                <ul>
+                    <li><strong>Computer Science & Engineering:</strong> ₹7.5 LPA</li>
+                    <li><strong>Mechanical Engineering:</strong> ₹4.8 LPA</li>
+                    <li><strong>Electronics & Telecommunication:</strong> ₹4.6 LPA</li>
+                    <li><strong>Electrical Engineering:</strong> ₹4.5 LPA</li>
+                    <li><strong>Civil Engineering:</strong> ₹4.2 LPA</li>
+                </ul>
+            </div>
+
+            <div class="info-block">
+                <h4><i class="fas fa-building"></i> Top Recruiters 2024-25</h4>
+                <div class="recruiter-list">
+                    <span class="recruiter-tag">TCS (190 offers)</span>
+                    <span class="recruiter-tag">Infosys (145 offers)</span>
+                    <span class="recruiter-tag">Wipro (120 offers)</span>
+                    <span class="recruiter-tag">Cognizant (110 offers)</span>
+                    <span class="recruiter-tag">Accenture (95 offers)</span>
+                    <span class="recruiter-tag">Capgemini (82 offers)</span>
+                    <span class="recruiter-tag">John Deere (45 offers)</span>
+                    <span class="recruiter-tag">L&T Infotech (38 offers)</span>
+                </div>
+            </div>
+
+            <div class="info-block">
+                <h4><i class="fas fa-graduation-cap"></i> Admission 2025-26</h4>
+                <p><strong>MHT-CET Cutoffs (CSE):</strong></p>
+                <ul>
+                    <li>General: 92 percentile</li>
+                    <li>OBC: 85 percentile</li>
+                    <li>SC: 75 percentile</li>
+                    <li>ST: 70 percentile</li>
+                </ul>
+                <p><strong>Last Date to Apply:</strong> June 15, 2026</p>
+                <p><strong>Counseling:</strong> July 2026</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <i class="fas fa-trophy"></i> AI-Powered by RAG + Generative UI | Sanjivani College of Engineering, Kopargaon
+    </div>
+</div>
+
+<script>
+    const messagesArea = document.getElementById('messagesArea');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const voiceBtn = document.getElementById('voiceBtn');
+    
+    let sessionId = localStorage.getItem('sessionId') || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('sessionId', sessionId);
+    
+    let queryCount = parseInt(localStorage.getItem('queryCount') || '0');
+    document.getElementById('queryCount').innerText = queryCount;
+    
+    let recognition = null;
+    let isListening = false;
+    
+    // ========== CHARTS ==========
+    const placementCtx = document.getElementById('placementRateChart').getContext('2d');
+    const packageCtx = document.getElementById('avgPackageChart').getContext('2d');
+    
+    new Chart(placementCtx, {
+        type: 'bar',
+        data: {
+            labels: ['CSE', 'Mechanical', 'Civil', 'Electrical', 'E&TC'],
+            datasets: [{
+                label: 'Placement Rate (%)',
+                data: [95, 82, 75, 78, 80],
+                backgroundColor: ['#0a2b3e', '#1a4a6e', '#2a6a8e', '#FFD700', '#FFA500'],
+                borderRadius: 8,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } }
+            }
+        }
+    });
+    
+    new Chart(packageCtx, {
+        type: 'bar',
+        data: {
+            labels: ['CSE', 'Mechanical', 'Civil', 'Electrical', 'E&TC'],
+            datasets: [{
+                label: 'Average Package (₹ LPA)',
+                data: [7.5, 4.8, 4.2, 4.5, 4.6],
+                backgroundColor: ['#0a2b3e', '#1a4a6e', '#2a6a8e', '#FFD700', '#FFA500'],
+                borderRadius: 8,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { callbacks: { label: (ctx) => `₹${ctx.raw} LPA` } }
+            }
+        }
+    });
+    
+    // ========== VOICE RECOGNITION ==========
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-IN';
+        
+        recognition.onstart = () => {
+            isListening = true;
+            voiceBtn.classList.add('listening');
+            voiceBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        };
+        
+        recognition.onresult = (event) => {
+            const text = event.results[0][0].transcript;
+            userInput.value = text;
+            sendMessage(text);
+        };
+        
+        recognition.onerror = () => {
+            stopListening();
+        };
+        
+        recognition.onend = () => {
+            stopListening();
+        };
+    }
+    
+    function stopListening() {
+        isListening = false;
+        voiceBtn.classList.remove('listening');
+        voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+    }
+    
+    voiceBtn.addEventListener('click', () => {
+        if (recognition) {
+            if (isListening) {
+                recognition.stop();
+                stopListening();
+            } else {
+                recognition.start();
+            }
+        } else {
+            alert('Voice input not supported in your browser');
+        }
+    });
+    
+    // ========== GENERATIVE UI FUNCTIONS ==========
+    function renderGenerativeUI(uiContext) {
+        if (!uiContext || !uiContext.data) return '';
+        
+        let html = '<div class="gen-ui-container">';
+        
+        // Placement UI
+        if (uiContext.type === 'placement') {
+            html += `<div class="gen-ui-card" style="border-left-color: #FFD700;">`;
+            html += `<h4><i class="fas fa-briefcase"></i> ${uiContext.data.heading}</h4>`;
+            html += `<div class="gen-placement-grid">`;
+            for (const metric of uiContext.data.metrics) {
+                html += `
+                    <div class="gen-placement-item">
+                        <div class="icon">${metric.icon}</div>
+                        <div class="value">${metric.value}</div>
+                        <div class="label">${metric.label}</div>
+                    </div>
+                `;
+            }
+            html += `</div>`;
+            html += `</div>`;
+        }
+        
+        // Cutoff UI
+        if (uiContext.type === 'cutoff') {
+            html += `<div class="gen-ui-card" style="border-left-color: #FF6B6B;">`;
+            html += `<h4><i class="fas fa-table"></i> ${uiContext.data.heading}</h4>`;
+            html += `<table class="gen-cutoff-table">`;
+            html += `<tr><th>Branch</th><th>General</th><th>OBC</th><th>SC</th><th>ST</th></tr>`;
+            for (const branch of uiContext.data.branches) {
+                html += `
+                    <tr>
+                        <td><strong>${branch.name}</strong></td>
+                        <td>${branch.general}</td>
+                        <td>${branch.obc}</td>
+                        <td>${branch.sc}</td>
+                        <td>${branch.st}</td>
+                    </tr>
+                `;
+            }
+            html += `</table>`;
+            html += `</div>`;
+        }
+        
+        // Fees UI
+        if (uiContext.type === 'fees') {
+            html += `<div class="gen-ui-card" style="border-left-color: #4CAF50;">`;
+            html += `<h4><i class="fas fa-rupee-sign"></i> ${uiContext.data.heading}</h4>`;
+            html += `<div class="gen-fee-grid">`;
+            for (const item of uiContext.data.items) {
+                html += `
+                    <div class="gen-fee-item">
+                        <span class="label">${item.label}</span>
+                        <span class="value">${item.value}</span>
+                    </div>
+                `;
+            }
+            html += `</div>`;
+            html += `</div>`;
+        }
+        
+        html += '</div>';
+        return html;
+    }
+    
+    // ========== MESSAGE RENDERER ==========
+    function appendMessage(text, isUser = false, confidence = null, sources = null, uiContext = null) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+        
+        let confidenceHTML = '';
+        if (confidence !== null) {
+            let badgeClass = 'confidence-high';
+            if (confidence < 0.5) badgeClass = 'confidence-low';
+            else if (confidence < 0.7) badgeClass = 'confidence-medium';
+            confidenceHTML = `<div class="confidence-badge ${badgeClass}">Confidence: ${Math.round(confidence * 100)}%</div>`;
+        }
+        
+        let sourcesHTML = '';
+        if (sources && sources.length > 0) {
+            const uniqueSources = [...new Set(sources)];
+            sourcesHTML = `<div style="font-size:10px;color:#999;margin-top:8px;">📚 Sources: ${uniqueSources.map(s => `<span class="source-badge">${s}</span>`).join('')}</div>`;
+        }
+        
+        let genUIHTML = '';
+        if (!isUser && uiContext && uiContext.type !== 'text') {
+            genUIHTML = renderGenerativeUI(uiContext);
+        }
+        
+        messageDiv.innerHTML = `
+            <div class="avatar">
+                <i class="${isUser ? 'fas fa-user' : 'fas fa-robot'}"></i>
+            </div>
+            <div class="bubble">
+                ${text.replace(/\n/g, '<br>')}
+                ${confidenceHTML}
+                ${sourcesHTML}
+                ${genUIHTML}
+            </div>
+        `;
+        messagesArea.appendChild(messageDiv);
+        messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+    
+    function showTyping() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'message bot-message';
+        typingDiv.id = 'typingIndicator';
+        typingDiv.innerHTML = `
+            <div class="avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="bubble">
+                <div class="typing-indicator">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </div>
+        `;
+        messagesArea.appendChild(typingDiv);
+        typingDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+    
+    function removeTyping() {
+        const typing = document.getElementById('typingIndicator');
+        if (typing) typing.remove();
+    }
+    
+    window.quickAsk = function(question) {
+        sendMessage(question);
+    };
+    
+    // ========== SEND MESSAGE ==========
+    async function sendMessage(message) {
+        if (!message.trim()) return;
+        
+        appendMessage(message, true);
+        userInput.value = '';
+        
+        queryCount++;
+        localStorage.setItem('queryCount', queryCount);
+        document.getElementById('queryCount').innerText = queryCount;
+        
+        showTyping();
+        
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',tickSize: 5,
+              tickPadding: 5,
+              tickRotation: 0,
+              legend: 'Lead Count',
+              legendPosition: 'middle',
+              legendOffset: -40,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    message: message, 
+                    sessionId: sessionId
+                })
+            });
+            
+            const data = await response.json();
+            removeTyping();
+            
+            // Render with Generative UI
+            appendMessage(data.reply, false, data.confidence, data.sources, data.uiContext);
+            
+            if (data.aiModel) {
+                document.getElementById('aiStatus').innerHTML = data.aiModel;
+            }
+            
+        } catch (error) {
+            removeTyping();
+            appendMessage("⚠️ Connection error. Please ensure server is running on port 5000.", false);
+        }
+    }
+    
+    sendBtn.addEventListener('click', () => sendMessage(userInput.value));
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage(userInput.value);
+    });
+    
+    async function checkHealth() {
+        try {
+            const response = await fetch('/health');
+            const data = await response.json();
+            if (data.aiModel) {
+                document.getElementById('aiStatus').innerHTML = data.aiModel;
+            }
+        } catch(err) {}
+    }
+    
+    checkHealth();
+    setInterval(checkHealth, 30000);
+</script>
+</body>
+</html>
