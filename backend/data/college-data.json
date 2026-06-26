@@ -1,0 +1,87 @@
+{
+  "college": {
+    "name": "Sanjivani College of Engineering, Kopargaon",
+    "shortName": "Sanjivani COE",
+    "established": 1983,
+    "accreditation": "NAAC AAA Grade, NBA Accredited",
+    "type": "Private Unaided",
+    "status": "Autonomous Institute",
+    "affiliation": "Savitribai Phule Pune University (SPPU)",
+    "campusArea": "50+ Acres",
+    "address": "Kopargaon, Ahmednagar District, Maharashtra - 423601",
+    "contact": {
+      "admission": "+91-2421-223800",
+      "placement": "+91-2421-223803",
+      "principal": "+91-2421-223801",
+      "email": "admission@sanjivanicoe.org.in",
+      "website": "www.sanjivanicoe.org.in"
+    }
+  },
+  "courses": {
+    "btech": [
+      {"name": "Computer Science & Engineering", "seats": 120, "duration": "4 years", "fees": 121000},
+      {"name": "Artificial Intelligence & ML", "seats": 60, "duration": "4 years", "fees": 121000},
+      {"name": "Mechanical Engineering", "seats": 120, "duration": "4 years", "fees": 121000},
+      {"name": "Electrical Engineering", "seats": 60, "duration": "4 years", "fees": 121000},
+      {"name": "Electronics & Telecommunication", "seats": 60, "duration": "4 years", "fees": 121000},
+      {"name": "Civil Engineering", "seats": 60, "duration": "4 years", "fees": 121000}
+    ],
+    "mtech": [
+      {"name": "Computer Engineering", "seats": 18, "fees": 120000},
+      {"name": "Mechanical Engineering", "seats": 18, "fees": 120000},
+      {"name": "Electrical Engineering", "seats": 18, "fees": 120000}
+    ],
+    "mba": {"seats": 60, "fees": 120000},
+    "mca": {"seats": 60, "fees": 100000}
+  },
+  "placement": {
+    "rate": "85%",
+    "highestPackage": 27,
+    "averagePackage": 5.8,
+    "totalPlaced": 827,
+    "totalOffers": 1050,
+    "topRecruiters": ["TCS", "Infosys", "Wipro", "Microsoft", "Amazon", "John Deere", "Capgemini", "Accenture"],
+    "branchWise": {
+      "Computer Science": {"rate": "95%", "average": 7.5},
+      "AI/ML": {"rate": "92%", "average": 7.2},
+      "Mechanical": {"rate": "82%", "average": 4.8},
+      "Electrical": {"rate": "78%", "average": 4.5}
+    }
+  },
+  "admission": {
+    "eligibility": "10+2 with PCM (50% aggregate, 45% for SC/ST)",
+    "entranceExams": ["JEE Main", "MHT-CET"],
+    "cutoffs": {
+      "Computer Science": {"general": 92, "obc": 85, "sc": 75, "st": 70},
+      "AI/ML": {"general": 88, "obc": 80, "sc": 70, "st": 65},
+      "Mechanical": {"general": 75, "obc": 68, "sc": 58, "st": 53},
+      "Civil": {"general": 70, "obc": 63, "sc": 53, "st": 48},
+      "Electrical": {"general": 72, "obc": 65, "sc": 55, "st": 50}
+    },
+    "importantDates": {
+      "applicationStart": "March 1, 2026",
+      "applicationEnd": "June 15, 2026",
+      "counselingStart": "July 1, 2026",
+      "classesStart": "August 1, 2026"
+    }
+  },
+  "fees": {
+    "btech": 121000,
+    "hostel": {"single": 95000, "double": 75000, "triple": 65000},
+    "transport": 25000,
+    "mess": 35000
+  },
+  "scholarships": {
+    "sc_st": "Full tuition fee waiver",
+    "obc": "50% tuition waiver (income < ₹6 LPA)",
+    "merit": {"90+": "100%", "80-89": "75%", "70-79": "50%"},
+    "girlChild": "25% tuition waiver (85%+ in 12th)",
+    "sports": "25-75% tuition waiver"
+  },
+  "facilities": {
+    "library": {"books": 75000, "journals": 250, "timings": "8 AM - 10 PM"},
+    "labs": {"computer": 12, "mechanical": 8, "electrical": 6, "electronics": 7, "civil": 5},
+    "sports": ["Cricket", "Football", "Basketball", "Volleyball", "Badminton", "Gym"],
+    "hostelAmenities": ["24/7 Wi-Fi", "Gym", "Common Room", "Security", "Power Backup"]
+  }
+}
